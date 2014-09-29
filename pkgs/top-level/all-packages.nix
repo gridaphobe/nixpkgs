@@ -2732,7 +2732,7 @@ let
     libc = glibc;
     binutils = binutils;
     shell = bash;
-    inherit libcxx coreutils zlib;
+    inherit coreutils zlib;
     nativeTools = false;
     nativeLibc = false;
   };

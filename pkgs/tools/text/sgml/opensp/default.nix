@@ -13,7 +13,7 @@ stdenv.mkDerivation {
       docsrc/*.xml
   '';
 
-  configureFlags = optional stdenv.isDarwin [
+  configureFlags = stdenv.lib.optional stdenv.isDarwin [
     "--with-libintl-prefix=/usr"
     "--with-libiconv-prefix=/usr"
   ];
