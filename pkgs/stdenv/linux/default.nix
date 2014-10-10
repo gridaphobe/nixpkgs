@@ -234,7 +234,7 @@ rec {
       # other purposes (binutils and top-level pkgs) too.
       inherit (stage3.pkgs) gettext gnum4 gmp perl glibc zlib linuxHeaders;
 
-      gcc = import ../../build-support/gcc-wrapper {
+      gcc = lib.makeOverridable (import ../../build-support/gcc-wrapper) {
         nativeTools = false;
         nativeLibc = false;
         gcc = stage4.stdenv.gcc.gcc;
@@ -294,7 +294,7 @@ rec {
       inherit (stage4.pkgs)
         gzip bzip2 xz bash binutils coreutils diffutils findutils gawk
         glibc gnumake gnused gnutar gnugrep gnupatch patchelf
-        attr acl paxctl zlib;
+        attr acl paxctl zlib pcre;
     };
   };
 
