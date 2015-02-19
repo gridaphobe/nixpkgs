@@ -12,9 +12,9 @@
   # null, the default standard environment is used.
   bootStdenv ? null
 
-, # Non-GNU/Linux OSes are currently "impure" platforms, with their libc
-  # outside of the store.  Thus, GCC, GFortran, & co. must always look for
-  # files in standard system directories (/usr/include, etc.)
+, # Non-GNU/Linux (and darwin) OSes are currently "impure" platforms, with
+  # their libc outside of the store.  Thus, GCC, GFortran, & co. must always
+  # look for files in standard system directories (/usr/include, etc.)
   noSysDirs ? (system != "x86_64-freebsd" && system != "i686-freebsd"
                && system != "x86_64-kfreebsd-gnu")
 
@@ -3192,6 +3192,7 @@ let
     stdenv = clangStdenv;
     libc = glibc;
     binutils = binutils;
+    shell = bash;
     inherit coreutils zlib;
     extraPackages = [ libcxx ];
     nativeTools = false;
@@ -3199,8 +3200,8 @@ let
   };
 
   #Use this instead of stdenv to build with clang
-  clangStdenv = if stdenv.isDarwin then stdenv else lowPrio (stdenvAdapters.overrideCC stdenv clang);
-  libcxxStdenv = stdenvAdapters.overrideCC stdenv (clangWrapSelf llvmPackages.clang);
+  clangStdenv  = if stdenv.isDarwin then stdenv else lowPrio (stdenvAdapters.overrideCC stdenv clang);
+  libcxxStdenv = if stdenv.isDarwin then stdenv else stdenvAdapters.overrideCC stdenv (clangWrapSelf llvmPackages.clang);
 
   clean = callPackage ../development/compilers/clean { };
 
@@ -3227,8 +3228,6 @@ let
 
   gcc       = gcc48;
   gcc_multi = gcc48_multi;
-
-  gccApple = throw "gccApple is no longer supported";
 
   gcc34 = wrapCC (import ../development/compilers/gcc/3.4 {
     inherit fetchurl stdenv noSysDirs;
@@ -4175,9 +4174,10 @@ let
     cc = baseCC;
     libc = libc;
     inherit stdenv binutils coreutils zlib;
+    inherit (darwin) dyld;
   };
 
-  wrapCC = wrapCCWith (makeOverridable (import ../build-support/cc-wrapper)) glibc;
+  wrapCC = wrapCCWith (makeOverridable (import ../build-support/cc-wrapper)) stdenv.cc.libc;
   # legacy version, used for gnat bootstrapping
   wrapGCC-old = baseGCC: (makeOverridable (import ../build-support/gcc-wrapper-old)) {
     nativeTools = stdenv.cc.nativeTools or false;
